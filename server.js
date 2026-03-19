@@ -1,0 +1,213 @@
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
+
+// Fix __dirname in ES module
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Paths
+const allFolder = path.join(__dirname, "all");
+const outputFile = path.join(__dirname, "index.html");
+
+// Read all HTML files in the "all" folder
+const files = fs.readdirSync(allFolder).filter((f) => f.endsWith(".html"));
+
+// Generate HTML cards
+const studentCards = files
+  .map((f) => {
+    const name = f.replace(".html", "");
+    return `
+    <div class="card">
+      <h3>${name}</h3>
+      <a href="./all/${f}" target="_blank">Open Submission</a>
+    </div>`;
+  })
+  .join("\n");
+
+// HTML template
+const htmlContent = `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PROJECT_COLLAB // DIRECTORY</title>
+  <style>
+    :root {
+      --bg-dark: #0a0a0c;
+      --card-bg: rgba(25, 25, 30, 0.6);
+      --accent-cyan: #00f2ff;
+      --accent-dim: rgba(0, 242, 255, 0.1);
+      --text-main: #e0e0e0;
+      --text-dim: #666;
+      --border: rgba(255, 255, 255, 0.05);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      background-color: var(--bg-dark);
+      background-image: 
+        linear-gradient(rgba(0, 242, 255, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 242, 255, 0.03) 1px, transparent 1px);
+      background-size: 40px 40px;
+      color: var(--text-main);
+      font-family: 'Inter', -apple-system, sans-serif;
+      margin: 0;
+      overflow-x: hidden;
+    }
+
+    /* Subtle Scanning Line Animation */
+    body::after {
+      content: "";
+      position: fixed;
+      top: -100%;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(to bottom, transparent, rgba(0, 242, 255, 0.02), transparent);
+      animation: scan 8s linear infinite;
+      pointer-events: none;
+    }
+
+    @keyframes scan {
+      0% { top: -100%; }
+      100% { top: 100%; }
+    }
+
+    header {
+      padding: 60px 20px;
+      text-align: center;
+      border-bottom: 1px solid var(--border);
+      backdrop-filter: blur(10px);
+    }
+
+    .brand {
+      font-family: monospace;
+      font-size: 0.8rem;
+      letter-spacing: 4px;
+      color: var(--accent-cyan);
+      text-transform: uppercase;
+      margin-bottom: 10px;
+      display: block;
+    }
+
+    h1 {
+      font-size: 2.5rem;
+      font-weight: 800;
+      margin: 0;
+      letter-spacing: -1px;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 60px auto;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 20px;
+      padding: 0 20px;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 30px;
+      position: relative;
+      transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+      backdrop-filter: blur(5px);
+      animation: fadeIn 0.8s ease backwards;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .card::before {
+      content: "";
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 2px;
+      background: var(--accent-cyan);
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform 0.4s ease;
+    }
+
+    .card:hover {
+      background: rgba(35, 35, 40, 0.8);
+      border-color: rgba(0, 242, 255, 0.3);
+      transform: translateY(-5px);
+    }
+
+    .card:hover::before {
+      transform: scaleX(1);
+    }
+
+    .card-id {
+      font-family: monospace;
+      font-size: 0.7rem;
+      color: var(--text-dim);
+      margin-bottom: 15px;
+      display: block;
+    }
+
+    .card h3 {
+      margin: 0 0 20px 0;
+      font-size: 1.4rem;
+      font-weight: 500;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      text-decoration: none;
+      color: var(--accent-cyan);
+      font-family: monospace;
+      font-size: 0.85rem;
+      font-weight: bold;
+      border: 1px solid var(--accent-dim);
+      padding: 8px 16px;
+      border-radius: 2px;
+      transition: all 0.2s ease;
+    }
+
+    .btn:hover {
+      background: var(--accent-dim);
+      box-shadow: 0 0 15px var(--accent-dim);
+    }
+
+    footer {
+      text-align: center;
+      padding: 100px 20px 40px;
+      font-family: monospace;
+      color: var(--text-dim);
+      font-size: 0.75rem;
+      letter-spacing: 2px;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <span class="brand">Mahakavi Devkota Campus</span>
+    <h1>Git and Github Session</h1>
+  </header>
+
+  <main class="container">
+    ${studentCards} 
+  </main>
+
+  <footer>
+    [ By CFC Rupandehi ]
+  </footer>
+
+</body>
+</html>`;
+
+// Write to index.html
+fs.writeFileSync(outputFile, htmlContent, "utf-8");
+
+console.log(
+  `✅ index.html generated with ${files.length} student submissions.`,
+);
